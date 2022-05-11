@@ -9,6 +9,8 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 import {
   FormControl,
   FormLabel,
@@ -53,7 +55,7 @@ const hostes = [
 const events = [
   {
     name: "Cata Hac. Jesús María",
-    time: [
+    schedule: [
       "23 de Mayo - 11:30 a 12:30 hrs.",
       "24 de Mayo - 12:00 a 13:00 hrs.",
       "25 de Mayo - 11:15 a 12:15 hrs.",
@@ -61,7 +63,7 @@ const events = [
   },
   {
     name: "Cata Hac. La Luz",
-    time: [
+    schedule: [
       "23 de Mayo - 13:30 a 14:30 hrs.",
       "24 de Mayo - 10:30 a 11:30 hrs.",
       "25 de Mayo - 12:45 a 13:45 hrs.",
@@ -69,7 +71,7 @@ const events = [
   },
   {
     name: "Ritual del Cacao",
-    time: [
+    schedule: [
       "23 de Mayo - 16:0 a 17:00 hrs.",
       "24 de Mayo - 16:00 a 17:00 hrs.",
       "25 de Mayo - 10:00 a 11:00 hrs.",
@@ -97,98 +99,87 @@ function Copyright(props) {
 
 function PersonalInformation(props) {
   const { nextStep, data, setData } = props;
+
   const handleNext = () => {
     if (
-      !data.nombre.trim() ||
-      !data.apellido.trim() ||
-      !data.email.trim() ||
-      !data.telefono.trim()
+      !data?.nombre.trim() ||
+      !data?.apellido.trim() ||
+      !data?.email.trim() ||
+      !data?.telefono.trim()
     ) {
-      return alert("Llene todos los campos");
+      return toast.info("Favor de llenar todos los campos");
     }
     nextStep();
   };
+
   return (
     <Grid component="form" container spacing={2}>
       <Grid item xs={12} sm={6}>
         <TextField
-          autoComplete="given-name"
-          name="nombre"
-          required
-          fullWidth
-          id="nombre"
-          label="Nombre(s)"
           autoFocus
-          value={data.nombre}
+          fullWidth
+          name="nombre"
+          label="Nombre(s)"
+          autoComplete="given-name"
+          value={data?.nombre || ""}
           onChange={(e) => setData({ ...data, nombre: e.target.value })}
         />
       </Grid>
       <Grid item xs={12} sm={6}>
         <TextField
-          required
           fullWidth
-          id="apellido"
-          label="Apellidos"
           name="apellido"
+          label="Apellidos"
           autoComplete="family-name"
-          value={data.apellido}
+          value={data?.apellido || ""}
           onChange={(e) => setData({ ...data, apellido: e.target.value })}
         />
       </Grid>
       <Grid item xs={6}>
         <TextField
-          required
           fullWidth
           name="empresa"
           label="Empresa"
-          id="empresa"
-          value={data.empresa}
+          value={data?.empresa || ""}
           onChange={(e) => setData({ ...data, empresa: e.target.value })}
         />
       </Grid>
       <Grid item xs={6}>
         <TextField
-          required
           fullWidth
           name="cargo"
           label="Cargo"
-          id="cargo"
-          value={data.cargo}
+          value={data?.cargo || ""}
           onChange={(e) => setData({ ...data, cargo: e.target.value })}
         />
       </Grid>
       <Grid item xs={12}>
         <TextField
-          required
           fullWidth
-          id="email"
-          label="Correo electrónico"
           name="email"
           autoComplete="email"
-          value={data.email}
+          label="Correo electrónico"
+          value={data?.email || ""}
           onChange={(e) => setData({ ...data, email: e.target.value })}
         />
       </Grid>
       <Grid item xs={6}>
         <TextField
-          required
           fullWidth
-          id="telefono"
-          label="Teléfono"
           name="telefono"
-          autoComplete="tel"
+          label="Teléfono"
           type="tel"
-          value={data.telefono}
+          autoComplete="tel"
+          value={data?.telefono || ""}
           onChange={(e) => setData({ ...data, telefono: e.target.value })}
         />
       </Grid>
       <Grid item xs={6}>
         <TextField
           fullWidth
-          id="web"
           label="Página web"
           name="web"
-          value={data.web}
+          value={data?.web || ""}
           onChange={(e) => setData({ ...data, web: e.target.value })}
         />
       </Grid>
@@ -199,7 +190,7 @@ function PersonalInformation(props) {
           label="Facebook"
           name="facebook"
           type="url"
-          value={data.facebook}
+          value={data?.facebook || ""}
           onChange={(e) => setData({ ...data, facebook: e.target.value })}
         />
       </Grid>
@@ -210,7 +201,7 @@ function PersonalInformation(props) {
           label="Instagram"
           name="instagram"
           type="url"
-          value={data.instagram}
+          value={data?.instagram || ""}
           onChange={(e) => setData({ ...data, instagram: e.target.value })}
         />
       </Grid>
@@ -221,7 +212,7 @@ function PersonalInformation(props) {
           label="Twitter"
           name="twitter"
           type="url"
-          value={data.twitter}
+          value={data?.twitter || ""}
           onChange={(e) => setData({ ...data, twitter: e.target.value })}
         />
       </Grid>
@@ -236,29 +227,67 @@ function PersonalInformation(props) {
 
 function EventInformation(props) {
   const { nextStep, prevStep, data, setData } = props;
+  const [schedule, setSchedule] = React.useState();
+
+  const handleNext = () => {
+    if (!data?.evento || !data.schedule) {
+      return toast.info("Seleccione el evento y horario");
+    }
+
+    nextStep();
+  };
 
   return (
     <Grid component="form" container spacing={3}>
       <Grid item xs={12}>
-        <FormControl fullWidth>
-          <InputLabel id="demo-simple-select-label">
+        <TextField
+          select
+          fullWidth
+          label="Evento"
+          color="primary"
+          name="evento"
+          value={data?.evento || ""}
+          onChange={(e) => {
+            const selected = events.find(
+              (event) => event.name === e.target.value
+            );
+            setData({ ...data, evento: e.target.value });
+            setSchedule(selected.schedule);
+          }}
+        >
+          <MenuItem value="" disabled selected>
             Seleccione un evento
-          </InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={data.evento}
-            label="Evento"
-            onChange={(e) => console.log(e.target.value)}
-          >
-            {events.map((item, key) => (
-              <MenuItem value={item.name} key={key}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+          </MenuItem>
+          {events.map((event, key) => (
+            <MenuItem key={key} value={event.name}>
+              {event.name}
+            </MenuItem>
+          ))}
+        </TextField>
       </Grid>
+
+      {data?.evento && schedule ? (
+        <Grid item xs={12}>
+          <FormControl>
+            <FormLabel>Horarios disponibles</FormLabel>
+            <RadioGroup
+              name="horario"
+              value={data?.schedule || ""}
+              onChange={(e) => setData({ ...data, schedule: e.target.value })}
+            >
+              {schedule.map((time, key) => (
+                <FormControlLabel
+                  key={key}
+                  value={time}
+                  control={<Radio />}
+                  label={time}
+                />
+              ))}
+            </RadioGroup>
+          </FormControl>
+        </Grid>
+      ) : null}
+
       <Grid item xs={12}>
         <Button
           sx={{ marginRight: 2 }}
@@ -266,9 +295,9 @@ function EventInformation(props) {
           color="primary"
           onClick={prevStep}
         >
-          Átras
+          Atrás
         </Button>
-        <Button variant="contained" color="primary" onClick={nextStep}>
+        <Button variant="contained" color="primary" onClick={handleNext}>
           Siguiente
         </Button>
       </Grid>
@@ -277,7 +306,7 @@ function EventInformation(props) {
 }
 
 function FinalQuestions(props) {
-  const { prevStep } = props;
+  const { prevStep, data } = props;
 
   return (
     <Grid container spacing={3}>
@@ -290,7 +319,7 @@ function FinalQuestions(props) {
             aria-labelledby="demo-radio-buttons-group-label"
             name="radio-buttons-group"
           >
-            {hostes.map((item) => (
+            {hostes.map((item, key) => (
               <FormControlLabel
                 value={item.name}
                 control={<Radio />}
@@ -304,7 +333,7 @@ function FinalQuestions(props) {
       <Grid item xs={12}>
         <FormControlLabel
           control={<Checkbox value="allowExtraEmails" color="primary" />}
-          label="I want to receive inspiration, marketing promotions and updates via email."
+          label="Quiero recibir promociones y actualizaciones via correo electrónico."
         />
       </Grid>
       <Grid item xs={12}>
@@ -314,9 +343,14 @@ function FinalQuestions(props) {
           color="primary"
           onClick={prevStep}
         >
-          Átras
+          Atrás
         </Button>
-        <Button variant="contained" color="primary" type="submit">
+        <Button
+          variant="contained"
+          color="primary"
+          type="submit"
+          onClick={console.log(data)}
+        >
           Finalizar
         </Button>
       </Grid>
@@ -328,9 +362,7 @@ const theme = createTheme();
 
 export default function SignUp() {
   const [activeStep, setActiveStep] = React.useState(0);
-  const [data, setData] = React.useState({
-    nombre: "",
-  });
+  const [data, setData] = React.useState();
 
   const nextStep = () => setActiveStep(activeStep + 1);
   const prevStep = () => setActiveStep(activeStep - 1);
@@ -386,13 +418,19 @@ export default function SignUp() {
             />
           ) : null}
           {activeStep === 1 ? (
-            <EventInformation nextStep={nextStep} prevStep={prevStep} />
+            <EventInformation
+              nextStep={nextStep}
+              prevStep={prevStep}
+              data={data}
+              setData={setData}
+            />
           ) : null}
           {activeStep === 2 ? <FinalQuestions prevStep={prevStep} /> : null}
         </Box>
         <Copyright sx={{ mt: 5 }} />
       </Container>
       <CssBaseline />
+      <ToastContainer theme="dark" />
     </ThemeProvider>
   );
 }
