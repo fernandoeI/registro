@@ -27,6 +27,11 @@ import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 import Credential from "./Credential";
 import { ComponentToPrint } from "./ComponentToPrint";
 import ReactToPrint from "react-to-print";
+import firebaseApp from "./firebase";
+import firebase from "firebase/compat/app";
+import "firebase/firestore";
+
+const db = firebase.firestore(firebaseApp);
 
 const hostes = [
   "Secretaría de Turismo",
@@ -307,8 +312,29 @@ function EventInformation(props) {
 }
 
 function FinalQuestions(props) {
-  const { prevStep, nextStep, data, setData } = props;
+  const { prevStep, nextStep, data, setData, db } = props;
+  const handleNext = () => {
+    try {
+      db.collection("registro").add({
+        evento: data.evento,
+        schedule: data.schedule,
+        name: data.nombre,
+        empresa: data?.empresa || "",
+        cargo: data?.cargo || "",
+        web: data?.web || "",
+        facebook: data?.facebook || "",
+        instagram: data?.instagram || "",
+        twitter: data?.twitter || "",
+        host: data.host,
+        promotion: data?.promotion || false,
+        fechaRegistro: new Date(),
+      });
+    } catch (error) {
+      console.log(error);
+    }
 
+    //    nextStep();
+  };
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
@@ -360,7 +386,7 @@ function FinalQuestions(props) {
           variant="contained"
           color="primary"
           type="submit"
-          onClick={nextStep}
+          onClick={handleNext}
         >
           Finalizar
         </Button>
@@ -475,6 +501,7 @@ export default function SignUp() {
               nextStep={nextStep}
               data={data}
               setData={setData}
+              db={db}
             />
           ) : null}
           {activeStep === 3 ? (
