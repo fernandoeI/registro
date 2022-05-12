@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useRef } from "react";
+import {QRCodeSVG} from 'qrcode.react';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
@@ -22,8 +23,10 @@ import {
   Stepper,
   CssBaseline,
 } from "@mui/material";
-import { PDFDownloadLink } from "@react-pdf/renderer";
+import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 import Credential from "./Credential";
+import { ComponentToPrint } from "./ComponentToPrint";
+import ReactToPrint from "react-to-print";
 
 const hostes = [
   "Secretaría de Turismo",
@@ -105,7 +108,7 @@ function PersonalInformation(props) {
       !data?.nombre?.trim() ||
       !data?.apellido?.trim() ||
       !data?.email?.trim() ||
-      !data?.telefono?.trim()
+      !data?.telefono
     ) {
       return toast.info("Favor de llenar todos los campos");
     }
@@ -168,8 +171,8 @@ function PersonalInformation(props) {
           fullWidth
           name="telefono"
           label="Teléfono"
-          value={data?.telefono || ""}
-          onChange={(e) => setData({ ...data, telefono: e.target.value })}
+          value={data?.telefono || 0}
+          onChange={(e) => setData({ ...data, telefono: Number(e.target.value) })}
         />
       </Grid>
       <Grid item xs={6}>
@@ -310,12 +313,11 @@ function FinalQuestions(props) {
     <Grid container spacing={3}>
       <Grid item xs={12}>
         <FormControl>
-          <FormLabel id="demo-radio-buttons-group-label">
+          <FormLabel>
             ¿Cómo recibiste la invitación?
           </FormLabel>
           <RadioGroup
-            aria-labelledby="demo-radio-buttons-group-label"
-            name="radio-buttons-group"
+            name="host"
             value={data?.host || ""}
             onChange={(e) => setData({ ...data, host: e.target.value })}
           >
@@ -336,7 +338,7 @@ function FinalQuestions(props) {
           control={
             <Checkbox
               color="primary"
-              checked={data?.promotion || ""}
+              checked={data?.promotion || false}
               onChange={(e) =>
                 setData({ ...data, promotion: e.target.checked })
               }
@@ -367,7 +369,8 @@ function FinalQuestions(props) {
   );
 }
 function Congratulations(props) {
-  const { data, setData } = props;
+  const { data } = props;
+  const componentRef = useRef();
 
   return (
     <Grid container spacing={3}>
@@ -378,19 +381,19 @@ function Congratulations(props) {
       </Grid>
 
       <Grid item xs={12}>
-        <PDFDownloadLink document={<Credential />} fileName="FORM">
-          {({ loading }) =>
-            loading ? (
-              <Button variant="contained" color="primary">
-                Cargando documento...
-              </Button>
-            ) : (
-              <Button variant="contained" color="primary">
+        <div>
+          <ReactToPrint
+            trigger={() => (
+              <Button color='primary' variant='contained'>
                 Descargar
               </Button>
-            )
-          }
-        </PDFDownloadLink>
+            )}
+            content={() => componentRef.current}
+          />
+          <div style={{ display: 'none' }}>
+            <ComponentToPrint ref={componentRef} data={data} qr={<QRCodeSVG value={'https://www.evento.com/validate-qr?m=carolina.cmorales3@gmail.com'} />} />
+          </div>
+        </div>
       </Grid>
     </Grid>
   );
@@ -405,14 +408,14 @@ export default function SignUp() {
   const nextStep = () => setActiveStep(activeStep + 1);
   const prevStep = () => setActiveStep(activeStep - 1);
 
-  const handleSubmit = (event) => {
+  /* const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get("email"),
       password: data.get("password"),
     });
-  };
+  }; */
 
   return (
     <ThemeProvider theme={theme}>
@@ -475,7 +478,7 @@ export default function SignUp() {
             />
           ) : null}
           {activeStep === 3 ? (
-            <Congratulations data={data} setData={setData} />
+            <Congratulations data={data} />
           ) : null}
         </Box>
         <Copyright sx={{ mt: 5 }} />
