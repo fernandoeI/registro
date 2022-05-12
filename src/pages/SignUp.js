@@ -25,6 +25,7 @@ import ReactToPrint from "react-to-print";
 import firebaseApp from "../firebase";
 import firebase from "firebase/compat/app";
 import "firebase/firestore";
+import ValidateBrowser from "../components/ValidateBrowser";
 
 const db = firebase.firestore(firebaseApp);
 
@@ -312,7 +313,7 @@ function FinalQuestions(props) {
   const { prevStep, nextStep, data, setData, db } = props;
   const handleNext = () => {
     try {
-      db.collection("registro").add({
+      /* db.collection("registro").add({
         evento: data.evento,
         schedule: data.schedule,
         name: data.nombre,
@@ -325,12 +326,12 @@ function FinalQuestions(props) {
         host: data.host,
         promotion: data?.promotion || false,
         fechaRegistro: new Date(),
-      });
+      }); */
+         nextStep();
     } catch (error) {
       console.log(error);
     }
 
-    //    nextStep();
   };
   return (
     <Grid container spacing={3}>
@@ -431,6 +432,7 @@ export default function SignUp() {
 
   return (
       <Container component="main" maxWidth="sm">
+        <ValidateBrowser />
         <Box
           sx={{
             marginTop: 8,
