@@ -20,7 +20,7 @@ export class ComponentToPrint extends React.PureComponent {
         }}
       >
         <Grid item textAlign='center'>
-          <img src={require('./assets/img/logo.png').default} alt='logo' width={350} />
+          <img src={require('../assets/img/logo.png')} alt='logo' width={350} />
         </Grid>
         <Grid item xs container spacing={3} direction='column' justifyContent='center'>
           <Grid item>
@@ -39,7 +39,6 @@ export class ComponentToPrint extends React.PureComponent {
             <Typography>{data.schedule}</Typography>
           </Grid>
           <Grid item textAlign='center'>
-            {/* <img src='https://qrcode.tec-it.com/API/QRCode?data=smsto%3A555-555-5555%3AGenerador+de+C%C3%B3digos+QR+de+TEC-IT' alt='qr' style={{ maxWidth: 150 }} /> */}
             {qr}
           </Grid>
           <Grid item textAlign='justify'>
