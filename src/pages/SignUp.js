@@ -313,7 +313,7 @@ function FinalQuestions(props) {
   const { prevStep, nextStep, data, setData, db } = props;
   const handleNext = () => {
     try {
-      /* db.collection("registro").add({
+      db.collection("registro").add({
         evento: data.evento,
         schedule: data.schedule,
         name: data.nombre,
@@ -326,8 +326,9 @@ function FinalQuestions(props) {
         host: data.host,
         promotion: data?.promotion || false,
         fechaRegistro: new Date(),
-      }); */
-         nextStep();
+      });
+      
+      nextStep();
     } catch (error) {
       console.log(error);
     }
