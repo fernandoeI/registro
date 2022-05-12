@@ -1,55 +1,55 @@
-import * as React from "react";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
+import React from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import {
+  Container,
+  Button,
   FormControl,
   FormLabel,
-  InputLabel,
   MenuItem,
+  Typography,
+  Link,
+  Checkbox,
+  FormControlLabel,
+  TextField,
+  Grid,
   Radio,
   RadioGroup,
-  Select,
   Box,
   Step,
   StepLabel,
   Stepper,
+  CssBaseline,
 } from "@mui/material";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import Credential from "./Credential";
 
 const hostes = [
-  { name: "Secretaría de Turismo" },
-  { name: "Asociación de Hoteles y Moteles de Tabasco, A.C." },
-  { name: "Viajes CAMGO" },
-  { name: "Tabasco Travel" },
-  { name: "Surline Travel" },
-  { name: "Grace Viajes y Eventos" },
-  { name: "RT Díaz Operadores" },
-  { name: "Viajes Tabasco | Mayan Cruise" },
-  { name: "Jungla Experience" },
-  { name: "Saraguato Extremo" },
-  { name: "Hacienda La Luz" },
-  { name: "Hacienda Jesús María" },
-  { name: "Jonuteek" },
-  { name: "BC BEP" },
-  { name: "Hotel Azul Esmeralda" },
-  { name: "Hotel Viva Villahermosa" },
-  { name: "Gamma Hotel Villahermosa" },
-  { name: "Hotel Olmeca Plaza" },
-  { name: "Hotel Urban Express by Olmeca Plaza" },
-  { name: "Holiday Inn Villahermosa Aeropuerto" },
-  { name: "Hotel Tabasco Inn" },
-  { name: "Hotel Villa Margaritas" },
-  { name: "Hacienda La Chonita" },
-  { name: "Wayakxuul" },
+  "Secretaría de Turismo",
+  "Asociación de Hoteles y Moteles de Tabasco, A.C.",
+  "Viajes CAMGO",
+  "Tabasco Travel",
+  "Surline Travel",
+  "Grace Viajes y Eventos",
+  "RT Díaz Operadores",
+  "Viajes Tabasco | Mayan Cruise",
+  "Jungla Experience",
+  "Saraguato Extremo",
+  "Hacienda La Luz",
+  "Hacienda Jesús María",
+  "Jonuteek",
+  "BC BEP",
+  "Hotel Azul Esmeralda",
+  "Hotel Viva Villahermosa",
+  "Gamma Hotel Villahermosa",
+  "Hotel Olmeca Plaza",
+  "Hotel Urban Express by Olmeca Plaza",
+  "Holiday Inn Villahermosa Aeropuerto",
+  "Hotel Tabasco Inn",
+  "Hotel Villa Margaritas",
+  "Hacienda La Chonita",
+  "Wayakxuul",
 ];
 
 const events = [
@@ -102,10 +102,10 @@ function PersonalInformation(props) {
 
   const handleNext = () => {
     if (
-      !data?.nombre.trim() ||
-      !data?.apellido.trim() ||
-      !data?.email.trim() ||
-      !data?.telefono.trim()
+      !data?.nombre?.trim() ||
+      !data?.apellido?.trim() ||
+      !data?.email?.trim() ||
+      !data?.telefono?.trim()
     ) {
       return toast.info("Favor de llenar todos los campos");
     }
@@ -168,8 +168,6 @@ function PersonalInformation(props) {
           fullWidth
           name="telefono"
           label="Teléfono"
-          type="tel"
-          autoComplete="tel"
           value={data?.telefono || ""}
           onChange={(e) => setData({ ...data, telefono: e.target.value })}
         />
@@ -230,7 +228,7 @@ function EventInformation(props) {
   const [schedule, setSchedule] = React.useState();
 
   const handleNext = () => {
-    if (!data?.evento || !data.schedule) {
+    if (!data?.evento || !data?.schedule) {
       return toast.info("Seleccione el evento y horario");
     }
 
@@ -251,7 +249,7 @@ function EventInformation(props) {
             const selected = events.find(
               (event) => event.name === e.target.value
             );
-            setData({ ...data, evento: e.target.value });
+            setData({ ...data, evento: e.target.value, schedule: "" });
             setSchedule(selected.schedule);
           }}
         >
@@ -306,7 +304,7 @@ function EventInformation(props) {
 }
 
 function FinalQuestions(props) {
-  const { prevStep, data } = props;
+  const { prevStep, nextStep, data, setData } = props;
 
   return (
     <Grid container spacing={3}>
@@ -318,12 +316,15 @@ function FinalQuestions(props) {
           <RadioGroup
             aria-labelledby="demo-radio-buttons-group-label"
             name="radio-buttons-group"
+            value={data?.host || ""}
+            onChange={(e) => setData({ ...data, host: e.target.value })}
           >
             {hostes.map((item, key) => (
               <FormControlLabel
-                value={item.name}
+                key={key}
+                value={item}
                 control={<Radio />}
-                label={item.name}
+                label={item}
               />
             ))}
           </RadioGroup>
@@ -332,7 +333,15 @@ function FinalQuestions(props) {
 
       <Grid item xs={12}>
         <FormControlLabel
-          control={<Checkbox value="allowExtraEmails" color="primary" />}
+          control={
+            <Checkbox
+              color="primary"
+              checked={data?.promotion || ""}
+              onChange={(e) =>
+                setData({ ...data, promotion: e.target.checked })
+              }
+            />
+          }
           label="Quiero recibir promociones y actualizaciones via correo electrónico."
         />
       </Grid>
@@ -349,10 +358,39 @@ function FinalQuestions(props) {
           variant="contained"
           color="primary"
           type="submit"
-          onClick={console.log(data)}
+          onClick={nextStep}
         >
           Finalizar
         </Button>
+      </Grid>
+    </Grid>
+  );
+}
+function Congratulations(props) {
+  const { data, setData } = props;
+
+  return (
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Typography>
+          Ha finalizado tu registro, esperamos tu asistencia!
+        </Typography>
+      </Grid>
+
+      <Grid item xs={12}>
+        <PDFDownloadLink document={<Credential />} fileName="FORM">
+          {({ loading }) =>
+            loading ? (
+              <Button variant="contained" color="primary">
+                Cargando documento...
+              </Button>
+            ) : (
+              <Button variant="contained" color="primary">
+                Descargar
+              </Button>
+            )
+          }
+        </PDFDownloadLink>
       </Grid>
     </Grid>
   );
@@ -388,7 +426,7 @@ export default function SignUp() {
           }}
         >
           <img
-            src={require("./assets/img/logo.png")}
+            src={require("./assets/img/logo.png").default}
             alt="logo"
             style={{ maxWidth: 300, width: "100%", paddingBottom: 20 }}
           />
@@ -406,6 +444,9 @@ export default function SignUp() {
               </Step>
               <Step>
                 <StepLabel>Información adicional</StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>Finalizado</StepLabel>
               </Step>
             </Stepper>
           </Box>
@@ -425,7 +466,17 @@ export default function SignUp() {
               setData={setData}
             />
           ) : null}
-          {activeStep === 2 ? <FinalQuestions prevStep={prevStep} /> : null}
+          {activeStep === 2 ? (
+            <FinalQuestions
+              prevStep={prevStep}
+              nextStep={nextStep}
+              data={data}
+              setData={setData}
+            />
+          ) : null}
+          {activeStep === 3 ? (
+            <Congratulations data={data} setData={setData} />
+          ) : null}
         </Box>
         <Copyright sx={{ mt: 5 }} />
       </Container>
